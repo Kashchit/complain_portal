@@ -1,0 +1,61 @@
+---
+- name: Deploy complaint portal application
+  hosts: "{{ target | default('green') }}"
+  become: yes
+  vars:
+    app_src: "../"
+  tasks:
+    - name: Create app directory
+      file:
+        path: /var/www/html
+        state: directory
+        owner: apache
+        group: apache
+        mode: "0755"
+
+    - name: Copy app files
+      copy:
+        src: "{{ app_src }}"
+        dest: /var/www/html/
+        owner: apache
+        group: apache
+
+    - name: Install production dependencies
+      npm:
+        path: /var/www/html
+        production: true
+
+    - name: Copy environment file
+      copy:
+        src: ../.env
+        dest: /var/www/html/.env
+        owner: apache
+        group: apache
+        mode: "0640"
+
+    - name: Check PM2 process
+      shell: pm2 describe complaint-portal
+      register: pm2_describe
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Start or restart app with PM2
+      shell: >
+        if pm2 describe complaint-portal > /dev/null; then
+          pm2 restart complaint-portal;
+        else
+          cd /var/www/html && pm2 start server.js --name complaint-portal;
+        fi
+
+    - name: Save PM2 process list
+      command: pm2 save
+
+    - name: Verify health endpoint
+      uri:
+        url: http://localhost:3000/api/health
+        status_code: 200
+      register: health_result
+
+    - name: Print health check result
+      debug:
+        var: health_result

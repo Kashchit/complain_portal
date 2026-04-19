@@ -1,0 +1,67 @@
+---
+- name: Configure Apache, ModSecurity, and Node runtime
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update all packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install Apache and ModSecurity
+      yum:
+        name:
+          - httpd
+          - mod_security
+        state: present
+
+    - name: Enable and start Apache
+      systemd:
+        name: httpd
+        enabled: yes
+        state: started
+
+    - name: Add security headers and hardening to Apache config
+      blockinfile:
+        path: /etc/httpd/conf/httpd.conf
+        block: |
+          Header always set X-Frame-Options "SAMEORIGIN"
+          Header always set X-XSS-Protection "1; mode=block"
+          Header always set X-Content-Type-Options "nosniff"
+          Header always set Referrer-Policy "strict-origin-when-cross-origin"
+          Header always set Content-Security-Policy "default-src 'self'"
+          ServerTokens Prod
+          ServerSignature Off
+
+    - name: Enable headers module
+      lineinfile:
+        path: /etc/httpd/conf.modules.d/00-base.conf
+        line: "LoadModule headers_module modules/mod_headers.so"
+        state: present
+
+    - name: Install NodeSource setup script for Node.js 18
+      shell: curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+
+    - name: Install Node.js 18
+      yum:
+        name: nodejs
+        state: present
+
+    - name: Install PM2 globally
+      npm:
+        name: pm2
+        global: yes
+
+    - name: Restart Apache
+      systemd:
+        name: httpd
+        state: restarted
+
+    - name: Verify Apache service
+      command: systemctl status httpd
+      register: apache_status
+      changed_when: false
+
+    - name: Print Apache status output
+      debug:
+        var: apache_status.stdout_lines
