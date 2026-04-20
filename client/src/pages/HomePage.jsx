@@ -20,8 +20,8 @@ const features = [
 ];
 
 export default function HomePage() {
-  const { isAuthenticated, role, customerToken } = useAuth();
-  const canFileTicket = isAuthenticated && role === "customer" && Boolean(customerToken);
+  const { isAuthenticated, role } = useAuth();
+  const canFileTicket = isAuthenticated && role === "customer";
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 md:py-16 space-y-14 animate-fade-in">
@@ -45,10 +45,10 @@ export default function HomePage() {
             </Link>
           )}
           <Link
-            to={role === "admin" ? "/track" : isAuthenticated && role === "customer" && customerToken ? "/dashboard" : "/track"}
+            to={role === "admin" ? "/track" : isAuthenticated && role === "customer" ? "/dashboard" : "/track"}
             className="btn-secondary inline-flex items-center justify-center min-w-[180px]"
           >
-            {role === "admin" ? "Track by reference" : isAuthenticated && role === "customer" && customerToken ? "My tickets" : "Track a ticket"}
+            {role === "admin" ? "Track by reference" : isAuthenticated && role === "customer" ? "My tickets" : "Track a ticket"}
           </Link>
         </div>
       </section>

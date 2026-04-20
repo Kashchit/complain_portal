@@ -8,8 +8,8 @@ const ShieldLogo = () => (
 );
 
 export default function Layout() {
-  const { isAuthenticated, role, profile, customerToken, logout } = useAuth();
-  const canFileTicket = isAuthenticated && role === "customer" && Boolean(customerToken);
+  const { isAuthenticated, role, profile, logout } = useAuth();
+  const canFileTicket = isAuthenticated && role === "customer";
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100">
@@ -33,7 +33,7 @@ export default function Layout() {
                 Admin
               </NavLink>
             )}
-            {isAuthenticated && role === "customer" && customerToken && (
+            {isAuthenticated && role === "customer" && (
               <NavLink to="/dashboard" className={({ isActive }) => `nav-pill ${isActive ? "nav-pill-active" : ""}`}>
                 My tickets
               </NavLink>

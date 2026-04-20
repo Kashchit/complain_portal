@@ -42,7 +42,11 @@ const configureSecurity = (app) => {
   app.use(helmet.frameguard({ action: "sameorigin" }));
 
   // SECURITY: CORS allows only trusted client origin to prevent unauthorized cross-origin requests.
-  app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+  // SECURITY: credentials: true allows the browser to send/receive session cookies on cross-origin requests.
+  app.use(cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true
+  }));
 
   // SECURITY: Prevents HTTP Parameter Pollution attacks.
   app.use(hpp());

@@ -9,6 +9,19 @@ const { findCustomerByEmail, createCustomer, normalizeEmail } = require("../db")
 
 const router = express.Router();
 
+// SECURITY: Session cookie config — httpOnly prevents XSS token theft, signed prevents tampering.
+const setSessionCookie = (res, token) => {
+  const isProd = process.env.NODE_ENV === "production";
+  res.cookie("session_token", token, {
+    httpOnly: true,
+    signed: true,
+    sameSite: "lax",
+    secure: isProd,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours — matches server-side TTL
+    path: "/"
+  });
+};
+
 // SECURITY: Rate limit OTP requests to reduce email abuse.
 const otpSendLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -125,9 +138,9 @@ router.post(
       });
 
       const customerToken = createToken(email);
+      setSessionCookie(res, customerToken);
       return res.status(201).json({
         success: true,
-        customerToken,
         profile: { email: customer.email, displayName: customer.display_name }
       });
     } catch (error) {
@@ -158,9 +171,9 @@ router.post(
       }
 
       const customerToken = createToken(email);
+      setSessionCookie(res, customerToken);
       return res.status(200).json({
         success: true,
-        customerToken,
         profile: { email: user.email, displayName: user.display_name }
       });
     } catch (error) {

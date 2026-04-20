@@ -17,24 +17,24 @@ const priorityStyle = {
 };
 
 export default function CustomerDashboardPage() {
-  const { customerToken, profile } = useAuth();
+  const { profile } = useAuth();
   const { showToast } = useToast();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const headers = useMemo(() => ({ "X-Customer-Token": customerToken }), [customerToken]);
+
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get("/customer/complaints", { headers });
+      const { data } = await api.get("/customer/complaints");
       setComplaints(data.complaints || []);
     } catch {
       showToast("Could not load your tickets");
     } finally {
       setLoading(false);
     }
-  }, [headers, showToast]);
+  }, [showToast]);
 
   useEffect(() => {
     load();

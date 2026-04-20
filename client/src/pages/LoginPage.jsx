@@ -54,8 +54,7 @@ export default function LoginPage() {
       });
       loginCustomer({
         name: data.profile.displayName,
-        email: data.profile.email,
-        customerToken: data.customerToken
+        email: data.profile.email
       });
       showToast("Welcome back", "success");
       navigate("/dashboard");
@@ -104,8 +103,7 @@ export default function LoginPage() {
       });
       loginCustomer({
         name: data.profile.displayName,
-        email: data.profile.email,
-        customerToken: data.customerToken
+        email: data.profile.email
       });
       showToast("Account created — you are signed in", "success");
       navigate("/dashboard");

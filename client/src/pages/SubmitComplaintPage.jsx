@@ -43,7 +43,7 @@ function readFileAsBase64(file) {
 export default function SubmitComplaintPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { customerToken, profile } = useAuth();
+  const { isAuthenticated, profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [filePreview, setFilePreview] = useState(null);
   const [attachmentFile, setAttachmentFile] = useState(null);
@@ -100,7 +100,7 @@ export default function SubmitComplaintPage() {
   };
 
   const onSubmit = async (values) => {
-    if (!customerToken) {
+    if (!isAuthenticated) {
       showToast("Please sign in to file a ticket");
       return;
     }
@@ -111,9 +111,7 @@ export default function SubmitComplaintPage() {
         payload.attachmentMime = attachmentFile.type;
         payload.attachmentBase64 = await readFileAsBase64(attachmentFile);
       }
-      const response = await api.post("/complaints", payload, {
-        headers: { "X-Customer-Token": customerToken }
-      });
+      const response = await api.post("/complaints", payload);
       navigate(`/success?ref=${response.data.ref_number}`, { state: values });
     } catch (error) {
       const msg = error.response?.data?.message || error.response?.data?.error || "Failed to submit ticket";

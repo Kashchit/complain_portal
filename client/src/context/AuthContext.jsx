@@ -1,12 +1,12 @@
 import { createContext, useContext, useMemo, useState } from "react";
+import api from "../api/axios";
 
 const AUTH_KEY = "complaint_portal_auth";
 
 const defaultState = {
   isAuthenticated: false,
   role: null,
-  profile: null,
-  customerToken: null
+  profile: null
 };
 
 const loadStoredAuth = () => {
@@ -15,14 +15,10 @@ const loadStoredAuth = () => {
     if (!raw) return defaultState;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return defaultState;
-    if (parsed.role === "customer" && !parsed.customerToken) {
-      return defaultState;
-    }
     return {
       isAuthenticated: Boolean(parsed.isAuthenticated),
       role: parsed.role || null,
-      profile: parsed.profile || null,
-      customerToken: parsed.customerToken || null
+      profile: parsed.profile || null
     };
   } catch {
     return defaultState;
@@ -46,24 +42,28 @@ export const AuthProvider = ({ children }) => {
       persist({
         isAuthenticated: true,
         role: "admin",
-        profile: { username: u },
-        customerToken: null
+        profile: { username: u }
       });
       return true;
     }
     return false;
   };
 
-  const loginCustomer = ({ name, email, customerToken }) => {
+  // Session cookie is set by the server automatically — we only track profile info in localStorage.
+  const loginCustomer = ({ name, email }) => {
     persist({
       isAuthenticated: true,
       role: "customer",
-      profile: { name: String(name || "").trim(), email: String(email || "").trim().toLowerCase() },
-      customerToken: String(customerToken || "")
+      profile: { name: String(name || "").trim(), email: String(email || "").trim().toLowerCase() }
     });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // Best-effort — clear local state even if the server call fails
+    }
     localStorage.removeItem(AUTH_KEY);
     setAuth(defaultState);
   };

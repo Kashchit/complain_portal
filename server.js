@@ -1,17 +1,20 @@
 require("dotenv").config();
 const path = require("path");
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const { ensureTable } = require("./db");
 const authRoutes = require("./routes/auth");
 const complaintsRoutes = require("./routes/complaints");
 const adminRoutes = require("./routes/admin");
 const customerRoutes = require("./routes/customer");
+const { revokeToken } = require("./lib/customerSessions");
 const { configureSecurity, globalRateLimiter } = require("./middleware/security");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 configureSecurity(app);
+app.use(cookieParser(process.env.SESSION_SECRET || "dev-cookie-secret-change-in-production"));
 app.use(globalRateLimiter);
 
 app.use("/api/complaints", express.json({ limit: "3mb" }));
@@ -40,6 +43,22 @@ app.get("/api/health", async (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+
+// SECURITY: Logout endpoint — clears session cookie and revokes server-side token.
+app.post("/api/auth/logout", (req, res) => {
+  const token = req.signedCookies.session_token;
+  if (token) {
+    revokeToken(token);
+  }
+  res.clearCookie("session_token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/"
+  });
+  return res.status(200).json({ success: true, message: "Logged out" });
+});
+
 app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
 
