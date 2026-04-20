@@ -52,7 +52,7 @@ app.post("/api/auth/logout", (req, res) => {
   }
   res.clearCookie("session_token", {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/"
   });

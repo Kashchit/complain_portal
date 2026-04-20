@@ -1,0 +1,58 @@
+# ──────────────────────────────────────────────────────────────
+# Monitoring Stack — Prometheus + Grafana
+#
+# Usage:
+#   docker-compose -f monitoring/docker-compose.monitoring.yml up -d
+#
+# Access:
+#   Prometheus → http://YOUR_SERVER_IP:9090
+#   Grafana    → http://YOUR_SERVER_IP:3000  (admin / admin)
+# ──────────────────────────────────────────────────────────────
+
+version: "3.8"
+
+services:
+  # ── Prometheus (metrics collection) ──
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - monitoring
+
+  # ── Grafana (dashboards & visualization) ──
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitoring:
+    driver: bridge

@@ -27,8 +27,8 @@ const configureSecurity = (app) => {
         imgSrc: ["'self'", "data:"],
         connectSrc:
           process.env.NODE_ENV === "production"
-            ? ["'self'"]
-            : ["'self'", "http://localhost:3000", "http://127.0.0.1:3000"],
+            ? ["'self'", process.env.CLIENT_URL || "*"]
+            : ["'self'", "http://localhost:3000", "http://127.0.0.1:3000", "ws://localhost:*"],
         objectSrc: ["'none'"],
         frameSrc: ["'self'", "data:"],
         frameAncestors: ["'self'"],

@@ -1,0 +1,43 @@
+# ──────────────────────────────────────────────────────────────
+# .dockerignore — keeps Docker images slim
+# ──────────────────────────────────────────────────────────────
+
+# Dependencies (installed inside container)
+node_modules/
+client/node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Environment files (secrets injected at runtime)
+.env
+.env.*
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# DevOps configs (not needed inside the app image)
+ansible/
+terraform/
+monitoring/
+docker/
+nginx/
+docs/
+.github/
+
+# Build artifacts / logs
+*.log
+npm-debug.log*
+coverage/
+.nyc_output/
+
+# Docker files
+Dockerfile
+docker-compose*.yml
+Jenkinsfile
+*.md

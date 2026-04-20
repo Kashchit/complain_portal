@@ -15,7 +15,8 @@ const setSessionCookie = (res, token) => {
   res.cookie("session_token", token, {
     httpOnly: true,
     signed: true,
-    sameSite: "lax",
+    // SECURITY: Cross-site requests (Cloudflare -> Render) require SameSite: 'none' and Secure: true.
+    sameSite: isProd ? "none" : "lax",
     secure: isProd,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours — matches server-side TTL
     path: "/"
