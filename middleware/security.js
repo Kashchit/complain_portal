@@ -41,10 +41,22 @@ const configureSecurity = (app) => {
   // SECURITY: Prevents clickjacking by restricting iframe embedding to same origin.
   app.use(helmet.frameguard({ action: "sameorigin" }));
 
-  // SECURITY: CORS allows only trusted client origin to prevent unauthorized cross-origin requests.
-  // SECURITY: credentials: true allows the browser to send/receive session cookies on cross-origin requests.
+  // SECURITY: CORS allows only trusted client origin.
+  // SECURITY: credentials: true allows cross-origin session cookies.
   app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      const allowed = process.env.CLIENT_URL || "http://localhost:5173";
+      // Normalize both for comparison (remove trailing slash)
+      const normalizedAllowed = allowed.replace(/\/$/, "");
+      const normalizedOrigin = origin ? origin.replace(/\/$/, "") : "";
+
+      if (!origin || normalizedOrigin === normalizedAllowed) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked for origin: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true
   }));
 

@@ -13,6 +13,9 @@ const { configureSecurity, globalRateLimiter } = require("./middleware/security"
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// SECURITY: Trust the Render proxy to allow secure cookies (HTTPS) behind the load balancer.
+app.set("trust proxy", 1);
+
 configureSecurity(app);
 app.use(cookieParser(process.env.SESSION_SECRET || "dev-cookie-secret-change-in-production"));
 app.use(globalRateLimiter);
