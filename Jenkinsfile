@@ -55,7 +55,8 @@ pipeline {
                 stage('Deploy Frontend (Cloudflare)') {
                     steps {
                         // Using npx wrangler to deploy the build folder
-                        sh "npx wrangler pages deploy client/dist --project-name ${CF_PROJECT_NAME} --branch main"
+                        // Added --commit-dirty=true to silence the git warning that can cause failures in some CI environments
+                        sh "npx wrangler pages deploy client/dist --project-name ${CF_PROJECT_NAME} --branch main --commit-dirty=true"
                     }
                 }
             }
