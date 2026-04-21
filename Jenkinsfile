@@ -8,8 +8,8 @@ pipeline {
         CLOUDFLARE_ACCOUNT_ID = credentials('CLOUDFLARE_ACCOUNT_ID')
         
         // Project Specifics
-        CF_PROJECT_NAME = "complain-72e"
-        APP_URL_PROD = "https://${CF_PROJECT_NAME}.pages.dev"
+        CF_PROJECT_NAME = "complain"
+        APP_URL_PROD = "https://complain-72e.pages.dev"
         REPO_URL = "https://github.com/Kashchit/complain_portal.git"
     }
 
